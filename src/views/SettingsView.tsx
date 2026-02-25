@@ -7,6 +7,7 @@ import {
   Moon,
   Monitor,
   Trash,
+  Check,
 } from "@phosphor-icons/react";
 import { Logo } from "../components/Logo";
 import { ConfirmDialog } from "../components/ConfirmDialog";
@@ -16,7 +17,7 @@ import type {
   NamingPattern,
   ThemeMode,
 } from "../types";
-import { NAMING_PATTERN_LABELS } from "../types";
+import { NAMING_PATTERN_LABELS, ACCENT_PRESETS } from "../types";
 
 interface SettingsViewProps {
   settings: AppSettings;
@@ -115,6 +116,62 @@ export function SettingsView({
         />
       </section>
 
+      {/* JPEG Quality - shown only when JPEG is selected */}
+      <AnimatePresence>
+        {settings.format === "jpeg" && (
+          <motion.section
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+          >
+            <SectionLabel>JPEG Quality</SectionLabel>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={10}
+                max={100}
+                step={5}
+                value={settings.jpegQuality}
+                onChange={(e) => onUpdate({ jpegQuality: Number(e.target.value) })}
+                className="flex-1 accent-[var(--color-accent)]"
+              />
+              <span className="text-sm font-mono text-zinc-600 dark:text-zinc-400 w-10 text-right">
+                {settings.jpegQuality}%
+              </span>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* WebP Quality - shown only when WebP is selected */}
+      <AnimatePresence>
+        {settings.format === "webp" && (
+          <motion.section
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 28 }}
+          >
+            <SectionLabel>WebP Quality</SectionLabel>
+            <div className="flex items-center gap-3">
+              <input
+                type="range"
+                min={10}
+                max={100}
+                step={5}
+                value={settings.webpQuality}
+                onChange={(e) => onUpdate({ webpQuality: Number(e.target.value) })}
+                className="flex-1 accent-[var(--color-accent)]"
+              />
+              <span className="text-sm font-mono text-zinc-600 dark:text-zinc-400 w-10 text-right">
+                {settings.webpQuality}%
+              </span>
+            </div>
+          </motion.section>
+        )}
+      </AnimatePresence>
+
       {/* Output Directory */}
       <section>
         <SectionLabel>Output Directory</SectionLabel>
@@ -171,6 +228,59 @@ export function SettingsView({
             </span>
           )}
         />
+      </section>
+
+      {/* Auto-open folder */}
+      <section>
+        <SectionLabel>After Conversion</SectionLabel>
+        <button
+          onClick={() => onUpdate({ autoOpenFolder: !settings.autoOpenFolder })}
+          className="flex items-center justify-between w-full px-3 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
+        >
+          <span className="text-sm text-zinc-700 dark:text-zinc-300">
+            Automatically open output folder
+          </span>
+          <div
+            className={`w-9 h-5 rounded-full relative transition-colors duration-200 ${
+              settings.autoOpenFolder
+                ? "bg-accent"
+                : "bg-zinc-300 dark:bg-zinc-700"
+            }`}
+          >
+            <motion.div
+              animate={{ x: settings.autoOpenFolder ? 16 : 2 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+              className="absolute top-0.5 w-4 h-4 rounded-full bg-white shadow-sm"
+            />
+          </div>
+        </button>
+      </section>
+
+      {/* Accent Color */}
+      <section>
+        <SectionLabel>Accent Color</SectionLabel>
+        <div className="flex flex-wrap gap-2">
+          {ACCENT_PRESETS.map((preset) => (
+            <button
+              key={preset.value}
+              onClick={() => onUpdate({ accentColor: preset.value })}
+              className="relative w-8 h-8 rounded-full transition-transform hover:scale-110"
+              style={{ backgroundColor: preset.value }}
+              title={preset.label}
+            >
+              {settings.accentColor === preset.value && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 20 }}
+                  className="absolute inset-0 flex items-center justify-center"
+                >
+                  <Check size={14} weight="bold" className="text-white drop-shadow-sm" />
+                </motion.div>
+              )}
+            </button>
+          ))}
+        </div>
       </section>
 
       {/* Clear Recent */}

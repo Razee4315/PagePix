@@ -131,6 +131,38 @@ fn save_image(
         .map_err(|e| format!("Failed to get file size: {}", e))
 }
 
+/// Parse a page range string like "1-5, 8, 10-12" into a sorted Vec of page numbers.
+/// Returns None if the string is empty (meaning all pages).
+fn parse_page_range(range_str: &str, total_pages: usize) -> Option<Vec<usize>> {
+    let trimmed = range_str.trim();
+    if trimmed.is_empty() {
+        return None; // all pages
+    }
+
+    let mut pages = Vec::new();
+    for part in trimmed.split(',') {
+        let part = part.trim();
+        if part.contains('-') {
+            let bounds: Vec<&str> = part.split('-').collect();
+            if bounds.len() == 2 {
+                let start = bounds[0].trim().parse::<usize>().unwrap_or(1).max(1);
+                let end = bounds[1].trim().parse::<usize>().unwrap_or(total_pages).min(total_pages);
+                for p in start..=end {
+                    pages.push(p);
+                }
+            }
+        } else if let Ok(p) = part.parse::<usize>() {
+            if p >= 1 && p <= total_pages {
+                pages.push(p);
+            }
+        }
+    }
+
+    pages.sort();
+    pages.dedup();
+    if pages.is_empty() { None } else { Some(pages) }
+}
+
 /// Main conversion function
 pub fn convert_pdf(
     app: &AppHandle,
@@ -139,6 +171,7 @@ pub fn convert_pdf(
     quality: u8,
     output_dir: &str,
     naming_pattern: &str,
+    page_range: &str,
 ) -> Result<(), String> {
     reset_cancel();
 
@@ -160,6 +193,11 @@ pub fn convert_pdf(
         .and_then(|s| s.to_str())
         .unwrap_or("page");
 
+    // Determine which pages to convert
+    let pages_to_convert = parse_page_range(page_range, total_pages)
+        .unwrap_or_else(|| (1..=total_pages).collect());
+    let convert_count = pages_to_convert.len();
+
     // Build output directory
     let out_dir = build_output_dir(pdf_path, output_dir);
     std::fs::create_dir_all(&out_dir)
@@ -175,12 +213,14 @@ pub fn convert_pdf(
         .set_target_width(2480) // ~300 DPI for A4
         .set_maximum_height(3508);
 
-    for (i, page) in document.pages().iter().enumerate() {
+    for (progress_idx, &page_num) in pages_to_convert.iter().enumerate() {
         if is_cancelled() {
             return Err("Conversion cancelled".to_string());
         }
 
-        let page_num = i + 1;
+        let page_index = (page_num - 1) as u16;
+        let page = document.pages().get(page_index)
+            .map_err(|e| format!("Failed to get page {}: {}", page_num, e))?;
 
         // Render page to image
         let dynamic_image = page
@@ -199,8 +239,8 @@ pub fn convert_pdf(
 
         // Emit progress
         let progress = ConversionProgress {
-            current_page: page_num,
-            total_pages,
+            current_page: progress_idx + 1,
+            total_pages: convert_count,
             thumbnail_base64: thumbnail,
         };
         let _ = app.emit("conversion-progress", &progress);
@@ -210,7 +250,7 @@ pub fn convert_pdf(
     let result = ConversionResult {
         output_dir: out_dir.to_string_lossy().to_string(),
         total_size,
-        page_count: total_pages,
+        page_count: convert_count,
         format: format.to_string(),
     };
     let _ = app.emit("conversion-complete", &result);

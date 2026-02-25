@@ -17,6 +17,8 @@ export interface AppSettings {
   outputDirectory: string;
   namingPattern: NamingPattern;
   theme: ThemeMode;
+  autoOpenFolder: boolean;
+  accentColor: string;
 }
 
 export interface ConversionProgress {
@@ -38,6 +40,7 @@ export interface RecentConversion {
   format: ImageFormat;
   timestamp: number;
   outputDir: string;
+  pdfPath?: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -47,6 +50,8 @@ export const DEFAULT_SETTINGS: AppSettings = {
   outputDirectory: "",
   namingPattern: "filename_page_padded",
   theme: "system",
+  autoOpenFolder: false,
+  accentColor: "#3B82F6",
 };
 
 export const NAMING_PATTERN_LABELS: Record<NamingPattern, string> = {
@@ -55,3 +60,14 @@ export const NAMING_PATTERN_LABELS: Record<NamingPattern, string> = {
   page_padded: "page_001",
   number_only: "001",
 };
+
+export const ACCENT_PRESETS = [
+  { label: "Blue",    value: "#3B82F6" },
+  { label: "Violet",  value: "#8B5CF6" },
+  { label: "Rose",    value: "#F43F5E" },
+  { label: "Amber",   value: "#F59E0B" },
+  { label: "Emerald", value: "#10B981" },
+  { label: "Cyan",    value: "#06B6D4" },
+  { label: "Orange",  value: "#F97316" },
+  { label: "Pink",    value: "#EC4899" },
+];

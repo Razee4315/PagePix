@@ -31,8 +31,13 @@ PagePix does one thing and does it perfectly: takes a multi-page PDF and convert
 PagePix is a lightweight desktop utility built with Tauri. It runs natively on your machine -- no internet required, no file uploads, no privacy concerns. Your documents never leave your computer.
 
 <p align="center">
-  <img src="images/home.png" alt="Home Screen" width="380" />
-  <img src="images/processing.png" alt="Converting" width="380" />
+  <img src="screenshot/Light_theme.png" alt="Light Theme" width="380" />
+  <img src="screenshot/dark_theme.png" alt="Dark Theme" width="380" />
+</p>
+
+<p align="center">
+  <img src="screenshot/converted_pdf.png" alt="Conversion Complete" width="380" />
+  <img src="screenshot/Setting_page.png" alt="Settings" width="380" />
 </p>
 
 ---

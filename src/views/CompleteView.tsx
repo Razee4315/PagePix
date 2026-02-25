@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { CheckCircle, FolderOpen, ArrowCounterClockwise, Copy, Check } from "@phosphor-icons/react";
@@ -9,6 +9,7 @@ import type { ConversionResult, ConversionProgress } from "../types";
 interface CompleteViewProps {
   result: ConversionResult;
   thumbnails: ConversionProgress[];
+  autoOpenFolder: boolean;
   onConvertAnother: () => void;
 }
 
@@ -21,10 +22,20 @@ function formatFileSize(bytes: number): string {
 export function CompleteView({
   result,
   thumbnails,
+  autoOpenFolder,
   onConvertAnother,
 }: CompleteViewProps) {
   const [copied, setCopied] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const autoOpenedRef = useRef(false);
+
+  // Auto-open the output folder when conversion completes
+  useEffect(() => {
+    if (autoOpenFolder && !autoOpenedRef.current) {
+      autoOpenedRef.current = true;
+      invoke("open_output_folder", { path: result.outputDir }).catch(console.error);
+    }
+  }, [autoOpenFolder, result.outputDir]);
 
   const handleOpenFolder = async () => {
     try {

@@ -10,6 +10,7 @@ import type { RecentConversion } from "../types";
 interface HomeViewProps {
   onFileSelected: (filePath: string) => void;
   recent: RecentConversion[];
+  onReconvert?: (item: RecentConversion) => void;
 }
 
 const fadeUp = (delay: number = 0) => ({
@@ -21,7 +22,7 @@ const fadeUp = (delay: number = 0) => ({
   },
 });
 
-export function HomeView({ onFileSelected, recent }: HomeViewProps) {
+export function HomeView({ onFileSelected, recent, onReconvert }: HomeViewProps) {
   const handleBrowse = useCallback(async () => {
     try {
       const selected = await open({
@@ -79,7 +80,7 @@ export function HomeView({ onFileSelected, recent }: HomeViewProps) {
         className="border-t border-zinc-200/80 dark:border-zinc-800/80 px-6 py-4"
       >
         {recent.length > 0 ? (
-          <RecentConversions recent={recent} />
+          <RecentConversions recent={recent} onReconvert={onReconvert} />
         ) : (
           <div className="flex items-center gap-2.5 py-2 px-1">
             <ClockCounterClockwise size={14} weight="bold" className="text-zinc-300 dark:text-zinc-700" />

@@ -8,11 +8,12 @@ async fn convert_pdf(
     quality: u8,
     output_dir: String,
     naming_pattern: String,
+    page_range: String,
 ) -> Result<(), String> {
     // Run PDF conversion on a blocking thread since pdfium is synchronous
     let handle = app.clone();
     let result = tauri::async_runtime::spawn_blocking(move || {
-        converter::convert_pdf(&handle, &path, &format, quality, &output_dir, &naming_pattern)
+        converter::convert_pdf(&handle, &path, &format, quality, &output_dir, &naming_pattern, &page_range)
     })
     .await
     .map_err(|e| format!("Task join error: {}", e))?;

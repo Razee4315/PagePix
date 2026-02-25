@@ -1,10 +1,11 @@
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
-import { Clock, FolderOpen } from "@phosphor-icons/react";
+import { Clock, FolderOpen, ArrowRight } from "@phosphor-icons/react";
 import type { RecentConversion } from "../types";
 
 interface RecentConversionsProps {
   recent: RecentConversion[];
+  onReconvert?: (item: RecentConversion) => void;
 }
 
 function timeAgo(timestamp: number): string {
@@ -18,7 +19,7 @@ function timeAgo(timestamp: number): string {
   return `${days}d ago`;
 }
 
-export function RecentConversions({ recent }: RecentConversionsProps) {
+export function RecentConversions({ recent, onReconvert }: RecentConversionsProps) {
   if (recent.length === 0) return null;
 
   return (
@@ -55,8 +56,8 @@ export function RecentConversions({ recent }: RecentConversionsProps) {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-zinc-400 dark:text-zinc-600">
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs text-zinc-400 dark:text-zinc-600 mr-1">
                 {timeAgo(item.timestamp)}
               </span>
               <button
@@ -69,6 +70,18 @@ export function RecentConversions({ recent }: RecentConversionsProps) {
               >
                 <FolderOpen size={14} className="text-zinc-500" />
               </button>
+              {onReconvert && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onReconvert(item);
+                  }}
+                  className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all"
+                  title="Convert again"
+                >
+                  <ArrowRight size={14} className="text-zinc-500" />
+                </button>
+              )}
             </div>
           </motion.div>
         ))}

@@ -38,6 +38,27 @@ function App() {
   const [progress, setProgress] = useState<ConversionProgress[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [result, setResult] = useState<ConversionResult | null>(null);
+  const [pageRange, setPageRange] = useState<string>("");
+
+  // Apply accent color to CSS custom properties
+  useEffect(() => {
+    const root = document.documentElement;
+    const hex = settings.accentColor || "#3B82F6";
+    root.style.setProperty("--color-accent", hex);
+
+    // Compute a darker hover variant (~15% darker)
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const darken = (v: number) => Math.max(0, Math.round(v * 0.82));
+    const hover = `#${darken(r).toString(16).padStart(2, "0")}${darken(g).toString(16).padStart(2, "0")}${darken(b).toString(16).padStart(2, "0")}`;
+    root.style.setProperty("--color-accent-hover", hover);
+
+    // Lighter variant for backgrounds
+    const lighten = (v: number) => Math.min(255, Math.round(v + (255 - v) * 0.85));
+    const light = `#${lighten(r).toString(16).padStart(2, "0")}${lighten(g).toString(16).padStart(2, "0")}${lighten(b).toString(16).padStart(2, "0")}`;
+    root.style.setProperty("--color-accent-light", light);
+  }, [settings.accentColor]);
 
   const cycleTheme = useCallback(() => {
     const order: ThemeMode[] = ["light", "dark", "system"];
@@ -52,6 +73,7 @@ function App() {
     setProgress([]);
     setTotalPages(0);
     setResult(null);
+    setPageRange("");
     setCurrentView("processing");
   }, []);
 
@@ -70,9 +92,10 @@ function App() {
         format: data.format,
         timestamp: Date.now(),
         outputDir: data.outputDir,
+        pdfPath: pdfPath,
       });
     },
-    [pdfFilename, addRecent],
+    [pdfFilename, pdfPath, addRecent],
   );
 
   const handleCancel = useCallback(() => {
@@ -81,12 +104,22 @@ function App() {
     setTotalPages(0);
   }, []);
 
+  const handleReconvert = useCallback(
+    (item: import("./types").RecentConversion) => {
+      if (item.pdfPath) {
+        handleFileSelected(item.pdfPath);
+      }
+    },
+    [handleFileSelected],
+  );
+
   const handleConvertAnother = useCallback(() => {
     setPdfPath("");
     setPdfFilename("");
     setProgress([]);
     setTotalPages(0);
     setResult(null);
+    setPageRange("");
     setCurrentView("home");
   }, []);
 
@@ -97,7 +130,6 @@ function App() {
   // Global keyboard shortcuts
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      // Ctrl+O — open file browser (only from home or complete view)
       if ((e.ctrlKey || e.metaKey) && e.key === "o") {
         e.preventDefault();
         if (viewRef.current === "home" || viewRef.current === "complete") {
@@ -110,7 +142,6 @@ function App() {
         }
       }
 
-      // Esc — go back from settings, or cancel conversion
       if (e.key === "Escape") {
         if (viewRef.current === "settings") {
           setCurrentView("home");
@@ -136,7 +167,7 @@ function App() {
         <AnimatePresence mode="wait">
           {currentView === "home" && (
             <motion.div key="home" className="h-full" variants={viewVariants} initial="initial" animate="animate" exit="exit">
-              <HomeView onFileSelected={handleFileSelected} recent={recent} />
+              <HomeView onFileSelected={handleFileSelected} recent={recent} onReconvert={handleReconvert} />
             </motion.div>
           )}
 
@@ -148,6 +179,8 @@ function App() {
                 settings={settings}
                 progress={progress}
                 totalPages={totalPages}
+                pageRange={pageRange}
+                onPageRangeChange={setPageRange}
                 onProgress={handleConversionProgress}
                 onComplete={handleConversionComplete}
                 onCancel={handleCancel}
@@ -160,6 +193,7 @@ function App() {
               <CompleteView
                 result={result!}
                 thumbnails={progress}
+                autoOpenFolder={settings.autoOpenFolder}
                 onConvertAnother={handleConvertAnother}
               />
             </motion.div>
