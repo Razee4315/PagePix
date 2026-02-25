@@ -9,7 +9,7 @@ import { SettingsView } from "./views/SettingsView";
 import { useTheme } from "./hooks/useTheme";
 import { useSettings } from "./hooks/useSettings";
 import { useRecentConversions } from "./hooks/useRecentConversions";
-import type { AppView, ConversionProgress, ConversionResult, ThemeMode } from "./types";
+import type { AppView, ConversionProgress, ConversionResult } from "./types";
 
 const viewVariants = {
   initial: { opacity: 0, y: 8, filter: "blur(4px)" },
