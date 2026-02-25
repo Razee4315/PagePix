@@ -12,14 +12,14 @@ interface HomeViewProps {
   recent: RecentConversion[];
 }
 
-const stagger = {
-  animate: { transition: { staggerChildren: 0.08 } },
-};
-
-const fadeUp = {
-  initial: { opacity: 0, y: 16 },
-  animate: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 200, damping: 22 } },
-};
+const fadeUp = (delay: number = 0) => ({
+  initial: { opacity: 0, y: 14 },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 200, damping: 22, delay },
+  },
+});
 
 export function HomeView({ onFileSelected, recent }: HomeViewProps) {
   const handleBrowse = useCallback(async () => {
@@ -38,14 +38,9 @@ export function HomeView({ onFileSelected, recent }: HomeViewProps) {
 
   return (
     <div className="h-full flex flex-col overflow-auto">
-      <motion.div
-        variants={stagger}
-        initial="initial"
-        animate="animate"
-        className="flex-1 flex flex-col items-center justify-center gap-6 px-6 py-8"
-      >
+      <div className="flex-1 flex flex-col items-center justify-center gap-6 px-6 py-8">
         {/* Hero */}
-        <motion.div variants={fadeUp} className="text-center space-y-2">
+        <motion.div {...fadeUp(0)} className="text-center space-y-2">
           <Logo size={40} className="mx-auto mb-3" />
           <h2 className="text-xl font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
             PDF to Images
@@ -56,12 +51,12 @@ export function HomeView({ onFileSelected, recent }: HomeViewProps) {
         </motion.div>
 
         {/* Drop Zone */}
-        <motion.div variants={fadeUp}>
+        <motion.div {...fadeUp(0.08)}>
           <DropZone onFileSelected={onFileSelected} onBrowse={handleBrowse} />
         </motion.div>
 
         {/* Feature pills */}
-        <motion.div variants={fadeUp} className="flex items-center gap-3">
+        <motion.div {...fadeUp(0.16)} className="flex items-center gap-3">
           {[
             { icon: Images, label: "PNG, JPEG, WebP" },
             { icon: Lightning, label: "300 DPI" },
@@ -76,13 +71,11 @@ export function HomeView({ onFileSelected, recent }: HomeViewProps) {
             </div>
           ))}
         </motion.div>
-      </motion.div>
+      </div>
 
       {/* Recent conversions at the bottom */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
+        {...fadeUp(0.24)}
         className="border-t border-zinc-200/80 dark:border-zinc-800/80 px-6 py-4"
       >
         {recent.length > 0 ? (
