@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { motion } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { open } from "@tauri-apps/plugin-dialog";
 import {
   FolderOpen,
@@ -9,6 +9,7 @@ import {
   Trash,
 } from "@phosphor-icons/react";
 import { Logo } from "../components/Logo";
+import { ConfirmDialog } from "../components/ConfirmDialog";
 import type {
   AppSettings,
   ImageFormat,
@@ -81,6 +82,8 @@ export function SettingsView({
   onThemeChange,
   onClearRecent,
 }: SettingsViewProps) {
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+
   const handlePickDirectory = useCallback(async () => {
     try {
       const selected = await open({ directory: true, multiple: false });
@@ -99,6 +102,7 @@ export function SettingsView({
   };
 
   return (
+    <>
     <div className="h-full overflow-auto px-6 py-6 space-y-7">
       {/* Format */}
       <section>
@@ -173,11 +177,7 @@ export function SettingsView({
       <section>
         <SectionLabel>Data</SectionLabel>
         <button
-          onClick={() => {
-            if (window.confirm("Clear all recent conversions?")) {
-              onClearRecent();
-            }
-          }}
+          onClick={() => setShowClearConfirm(true)}
           className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-danger hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
         >
           <Trash size={16} weight="bold" />
@@ -201,5 +201,22 @@ export function SettingsView({
         </div>
       </section>
     </div>
+
+    {/* Confirm clear dialog */}
+    <AnimatePresence>
+      {showClearConfirm && (
+        <ConfirmDialog
+          title="Clear recent conversions"
+          message="This will remove all your conversion history. This action cannot be undone."
+          confirmLabel="Clear All"
+          onConfirm={() => {
+            onClearRecent();
+            setShowClearConfirm(false);
+          }}
+          onCancel={() => setShowClearConfirm(false)}
+        />
+      )}
+    </AnimatePresence>
+    </>
   );
 }

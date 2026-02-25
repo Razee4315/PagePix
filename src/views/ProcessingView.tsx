@@ -1,10 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 import { XCircle, WarningCircle, ArrowCounterClockwise, House } from "@phosphor-icons/react";
 import { ProgressBar } from "../components/ProgressBar";
 import { PageThumbnailGrid } from "../components/PageThumbnailGrid";
+import { ImageLightbox } from "../components/ImageLightbox";
 import type {
   AppSettings,
   ConversionProgress,
@@ -34,6 +35,7 @@ export function ProcessingView({
 }: ProcessingViewProps) {
   const startedRef = useRef(false);
   const [error, setError] = useState<string | null>(null);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (startedRef.current) return;
@@ -99,9 +101,20 @@ export function ProcessingView({
   const handleRetry = () => {
     setError(null);
     startedRef.current = false;
-    // Force re-mount by resetting — parent will trigger fresh conversion
     onCancel();
   };
+
+  const handleThumbnailClick = useCallback((index: number) => {
+    setLightboxIndex(index);
+  }, []);
+
+  const handleLightboxClose = useCallback(() => {
+    setLightboxIndex(null);
+  }, []);
+
+  const handleLightboxNavigate = useCallback((index: number) => {
+    setLightboxIndex(index);
+  }, []);
 
   const currentPage = progress.length;
 
@@ -155,40 +168,53 @@ export function ProcessingView({
   }
 
   return (
-    <div className="h-full flex flex-col px-6 py-6 gap-6 overflow-auto">
-      <div>
-        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
-          Converting
-        </h2>
-        <p
-          data-selectable
-          className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono truncate"
-        >
-          {pdfFilename}
-        </p>
+    <>
+      <div className="h-full flex flex-col px-6 py-6 gap-6 overflow-auto">
+        <div>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 tracking-tight">
+            Converting
+          </h2>
+          <p
+            data-selectable
+            className="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5 font-mono truncate"
+          >
+            {pdfFilename}
+          </p>
+        </div>
+
+        <ProgressBar current={currentPage} total={totalPages || currentPage} />
+
+        <div className="flex-1 overflow-auto">
+          <PageThumbnailGrid
+            thumbnails={progress}
+            totalPages={totalPages || currentPage}
+            onThumbnailClick={handleThumbnailClick}
+          />
+        </div>
+
+        <div className="flex justify-center pt-2 pb-2">
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={handleCancel}
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm font-medium transition-colors"
+            title="Cancel conversion"
+          >
+            <XCircle size={16} weight="bold" />
+            Cancel
+          </motion.button>
+        </div>
       </div>
 
-      <ProgressBar current={currentPage} total={totalPages || currentPage} />
-
-      <div className="flex-1 overflow-auto">
-        <PageThumbnailGrid
+      {/* Image lightbox */}
+      {lightboxIndex !== null && progress[lightboxIndex] && (
+        <ImageLightbox
           thumbnails={progress}
-          totalPages={totalPages || currentPage}
+          currentIndex={lightboxIndex}
+          onClose={handleLightboxClose}
+          onNavigate={handleLightboxNavigate}
         />
-      </div>
-
-      <div className="flex justify-center pt-2 pb-2">
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={handleCancel}
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 text-zinc-600 dark:text-zinc-400 text-sm font-medium transition-colors"
-          title="Cancel conversion"
-        >
-          <XCircle size={16} weight="bold" />
-          Cancel
-        </motion.button>
-      </div>
-    </div>
+      )}
+    </>
   );
 }

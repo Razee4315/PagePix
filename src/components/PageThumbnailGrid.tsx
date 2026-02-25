@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
+import { MagnifyingGlassPlus } from "@phosphor-icons/react";
 import type { ConversionProgress } from "../types";
 
 interface PageThumbnailGridProps {
   thumbnails: ConversionProgress[];
   totalPages: number;
+  onThumbnailClick?: (index: number) => void;
 }
 
 function SkeletonThumbnail({ index }: { index: number }) {
@@ -31,10 +33,18 @@ function SkeletonThumbnail({ index }: { index: number }) {
 export function PageThumbnailGrid({
   thumbnails,
   totalPages,
+  onThumbnailClick,
 }: PageThumbnailGridProps) {
   const slots = Array.from({ length: totalPages }, (_, i) => {
     const thumb = thumbnails.find((t) => t.currentPage === i + 1);
     return { page: i + 1, thumb };
+  });
+
+  // Build a mapping from page number to index in the thumbnails array
+  // so we can pass the correct index to the lightbox
+  const pageToThumbIndex = new Map<number, number>();
+  thumbnails.forEach((t, idx) => {
+    pageToThumbIndex.set(t.currentPage, idx);
   });
 
   return (
@@ -46,21 +56,37 @@ export function PageThumbnailGrid({
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ type: "spring", stiffness: 200, damping: 20 }}
-            className="aspect-[3/4] rounded-lg overflow-hidden bg-white dark:bg-zinc-800 ring-1 ring-zinc-200 dark:ring-zinc-700 relative group"
+            className={`aspect-[3/4] rounded-lg overflow-hidden bg-white dark:bg-zinc-800 ring-1 ring-zinc-200 dark:ring-zinc-700 relative group ${
+              onThumbnailClick && thumb.thumbnailBase64 ? "cursor-pointer" : ""
+            }`}
+            onClick={() => {
+              if (onThumbnailClick && thumb.thumbnailBase64) {
+                const idx = pageToThumbIndex.get(page);
+                if (idx !== undefined) onThumbnailClick(idx);
+              }
+            }}
           >
             {thumb.thumbnailBase64 ? (
               <img
                 src={`data:image/png;base64,${thumb.thumbnailBase64}`}
                 alt={`Page ${page}`}
                 className="w-full h-full object-cover"
+                draggable={false}
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center bg-accent/5">
                 <span className="text-xs font-mono text-accent">{page}</span>
               </div>
             )}
-            <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/40 to-transparent p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-              <span className="text-[10px] font-mono text-white">{page}</span>
+
+            {/* Hover overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute bottom-0 inset-x-0 p-1.5 flex items-center justify-between">
+                <span className="text-[10px] font-mono text-white">{page}</span>
+                {onThumbnailClick && thumb.thumbnailBase64 && (
+                  <MagnifyingGlassPlus size={12} weight="bold" className="text-white/70" />
+                )}
+              </div>
             </div>
           </motion.div>
         ) : (
