@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, monospace;
@@ -18,18 +20,26 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Prevent text selection in desktop app UI */
 body {
   user-select: none;
   overflow: hidden;
 }
 
-/* Allow text selection in specific areas */
+/* Enable native drag on titlebar */
+*[data-tauri-drag-region] {
+  app-region: drag;
+}
+
+/* Buttons inside drag region must be clickable */
+*[data-tauri-drag-region] button,
+*[data-tauri-drag-region] a {
+  app-region: no-drag;
+}
+
 [data-selectable] {
   user-select: text;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -47,7 +57,6 @@ body {
   background: oklch(0.6 0 0 / 0.5);
 }
 
-/* Dark mode scrollbar */
 .dark ::-webkit-scrollbar-thumb {
   background: oklch(0.5 0 0 / 0.4);
 }

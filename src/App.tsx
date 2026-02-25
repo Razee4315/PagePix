@@ -10,11 +10,20 @@ import { useSettings } from "./hooks/useSettings";
 import { useRecentConversions } from "./hooks/useRecentConversions";
 import type { AppView, ConversionProgress, ConversionResult, ThemeMode } from "./types";
 
-const viewTransition = {
-  initial: { opacity: 0, y: 12 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -12 },
-  transition: { duration: 0.25, ease: [0.16, 1, 0.3, 1] },
+const viewVariants = {
+  initial: { opacity: 0, y: 8, filter: "blur(4px)" },
+  animate: {
+    opacity: 1,
+    y: 0,
+    filter: "blur(0px)",
+    transition: { type: "spring", stiffness: 260, damping: 24 },
+  },
+  exit: {
+    opacity: 0,
+    y: -6,
+    filter: "blur(4px)",
+    transition: { duration: 0.15, ease: "easeIn" },
+  },
 };
 
 function App() {
@@ -81,7 +90,7 @@ function App() {
   }, []);
 
   return (
-    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 rounded-lg overflow-hidden">
       <TitleBar
         theme={theme}
         resolvedTheme={resolvedTheme}
@@ -93,16 +102,13 @@ function App() {
       <main className="flex-1 overflow-hidden relative">
         <AnimatePresence mode="wait">
           {currentView === "home" && (
-            <motion.div key="home" className="h-full" {...viewTransition}>
-              <HomeView
-                onFileSelected={handleFileSelected}
-                recent={recent}
-              />
+            <motion.div key="home" className="h-full" variants={viewVariants} initial="initial" animate="animate" exit="exit">
+              <HomeView onFileSelected={handleFileSelected} recent={recent} />
             </motion.div>
           )}
 
           {currentView === "processing" && (
-            <motion.div key="processing" className="h-full" {...viewTransition}>
+            <motion.div key="processing" className="h-full" variants={viewVariants} initial="initial" animate="animate" exit="exit">
               <ProcessingView
                 pdfPath={pdfPath}
                 pdfFilename={pdfFilename}
@@ -117,7 +123,7 @@ function App() {
           )}
 
           {currentView === "complete" && (
-            <motion.div key="complete" className="h-full" {...viewTransition}>
+            <motion.div key="complete" className="h-full" variants={viewVariants} initial="initial" animate="animate" exit="exit">
               <CompleteView
                 result={result!}
                 thumbnails={progress}
@@ -127,7 +133,7 @@ function App() {
           )}
 
           {currentView === "settings" && (
-            <motion.div key="settings" className="h-full" {...viewTransition}>
+            <motion.div key="settings" className="h-full" variants={viewVariants} initial="initial" animate="animate" exit="exit">
               <SettingsView
                 settings={settings}
                 onUpdate={updateSettings}

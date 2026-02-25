@@ -7,7 +7,6 @@ import {
   Moon,
   Monitor,
   Trash,
-  Info,
 } from "@phosphor-icons/react";
 import { Logo } from "../components/Logo";
 import type {
@@ -26,8 +25,6 @@ interface SettingsViewProps {
   onClearRecent: () => void;
 }
 
-/* ---------- Sub-components ---------- */
-
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
     <h3 className="text-[11px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider mb-3">
@@ -40,11 +37,13 @@ function ToggleGroup<T extends string>({
   options,
   value,
   onChange,
+  layoutId,
   renderLabel,
 }: {
   options: T[];
   value: T;
   onChange: (v: T) => void;
+  layoutId: string;
   renderLabel?: (v: T) => React.ReactNode;
 }) {
   return (
@@ -61,9 +60,9 @@ function ToggleGroup<T extends string>({
         >
           {value === opt && (
             <motion.div
-              layoutId="toggle-bg"
+              layoutId={layoutId}
               className="absolute inset-0 bg-white dark:bg-zinc-800 rounded-lg shadow-sm"
-              transition={{ type: "spring", stiffness: 300, damping: 25 }}
+              transition={{ type: "spring", stiffness: 400, damping: 28 }}
             />
           )}
           <span className="relative z-10">
@@ -74,38 +73,6 @@ function ToggleGroup<T extends string>({
     </div>
   );
 }
-
-function QualitySlider({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: number;
-  onChange: (v: number) => void;
-}) {
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-sm text-zinc-600 dark:text-zinc-400">{label}</span>
-        <span className="text-sm font-mono font-medium text-zinc-700 dark:text-zinc-300">
-          {value}%
-        </span>
-      </div>
-      <input
-        type="range"
-        min={10}
-        max={100}
-        step={5}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-1.5 rounded-full bg-zinc-200 dark:bg-zinc-800 appearance-none cursor-pointer accent-accent"
-      />
-    </div>
-  );
-}
-
-/* ---------- Main ---------- */
 
 export function SettingsView({
   settings,
@@ -126,13 +93,13 @@ export function SettingsView({
   }, [onUpdate]);
 
   const themeIcons: Record<ThemeMode, React.ReactNode> = {
-    light: <Sun size={14} weight="bold" />,
-    dark: <Moon size={14} weight="bold" />,
-    system: <Monitor size={14} weight="bold" />,
+    light: <Sun size={13} weight="bold" />,
+    dark: <Moon size={13} weight="bold" />,
+    system: <Monitor size={13} weight="bold" />,
   };
 
   return (
-    <div className="h-full overflow-auto px-6 py-6 space-y-8">
+    <div className="h-full overflow-auto px-6 py-6 space-y-7">
       {/* Format */}
       <section>
         <SectionLabel>Output Format</SectionLabel>
@@ -140,39 +107,9 @@ export function SettingsView({
           options={["png", "jpeg", "webp"]}
           value={settings.format}
           onChange={(format) => onUpdate({ format })}
+          layoutId="format-toggle"
         />
       </section>
-
-      {/* Quality (conditional) */}
-      {settings.format === "jpeg" && (
-        <motion.section
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <SectionLabel>JPEG Quality</SectionLabel>
-          <QualitySlider
-            label="Compression quality"
-            value={settings.jpegQuality}
-            onChange={(v) => onUpdate({ jpegQuality: v })}
-          />
-        </motion.section>
-      )}
-
-      {settings.format === "webp" && (
-        <motion.section
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-        >
-          <SectionLabel>WebP Quality</SectionLabel>
-          <QualitySlider
-            label="Compression quality"
-            value={settings.webpQuality}
-            onChange={(v) => onUpdate({ webpQuality: v })}
-          />
-        </motion.section>
-      )}
 
       {/* Output Directory */}
       <section>
@@ -184,18 +121,12 @@ export function SettingsView({
           >
             {settings.outputDirectory || "Same as PDF location"}
           </div>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             onClick={handlePickDirectory}
             className="p-2.5 rounded-xl bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors"
           >
-            <FolderOpen
-              size={18}
-              weight="bold"
-              className="text-zinc-500 dark:text-zinc-400"
-            />
-          </motion.button>
+            <FolderOpen size={18} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
+          </button>
         </div>
       </section>
 
@@ -228,6 +159,7 @@ export function SettingsView({
           options={["light", "dark", "system"]}
           value={theme}
           onChange={onThemeChange}
+          layoutId="theme-toggle"
           renderLabel={(v) => (
             <span className="flex items-center gap-1.5">
               {themeIcons[v]}
