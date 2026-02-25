@@ -81,9 +81,9 @@ fn generate_filename(
     }
 }
 
-/// Create a small thumbnail (base64-encoded PNG) from an image
+/// Create a thumbnail (base64-encoded PNG) from an image
 fn create_thumbnail(img: &DynamicImage) -> String {
-    let thumb = img.thumbnail(120, 160);
+    let thumb = img.thumbnail(800, 1100);
     let mut buf = Cursor::new(Vec::new());
     if thumb.write_to(&mut buf, ImgFmt::Png).is_ok() {
         base64::engine::general_purpose::STANDARD.encode(buf.into_inner())

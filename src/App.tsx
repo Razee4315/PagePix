@@ -61,9 +61,11 @@ function App() {
   }, [settings.accentColor]);
 
   const cycleTheme = useCallback(() => {
-    const order: ThemeMode[] = ["light", "dark", "system"];
-    const idx = order.indexOf(theme);
-    setTheme(order[(idx + 1) % order.length]);
+    // Title bar toggle: just light ↔ dark. System option is in Settings.
+    const resolvedCurrent = theme === "system"
+      ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+      : theme;
+    setTheme(resolvedCurrent === "dark" ? "light" : "dark");
   }, [theme, setTheme]);
 
   const handleFileSelected = useCallback((filePath: string) => {

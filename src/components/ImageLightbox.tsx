@@ -51,7 +51,7 @@ export function ImageLightbox({
         className="fixed inset-0 z-50 flex flex-col"
         onClick={onClose}
       >
-        {/* Backdrop — full black */}
+        {/* Backdrop */}
         <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-md" />
 
         {/* Top bar */}
@@ -59,7 +59,6 @@ export function ImageLightbox({
           className="relative z-10 flex items-center justify-between px-4 py-3 shrink-0"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Page indicator */}
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold text-white tabular-nums">
               Page {current.currentPage}
@@ -68,8 +67,6 @@ export function ImageLightbox({
               of {thumbnails.length}
             </span>
           </div>
-
-          {/* Close */}
           <button
             onClick={onClose}
             className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors"
@@ -81,30 +78,30 @@ export function ImageLightbox({
 
         {/* Image area — fills remaining space */}
         <div
-          className="relative z-10 flex-1 flex items-center justify-center px-14 pb-4 min-h-0"
+          className="relative z-10 flex-1 flex items-center justify-center px-16 pb-3 min-h-0 overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Prev button */}
           <button
             onClick={handlePrev}
             disabled={!hasPrev}
-            className="absolute left-2 top-1/2 -translate-y-1/2 p-3 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-0 disabled:pointer-events-none text-white transition-all"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-0 disabled:pointer-events-none text-white transition-all"
             title="Previous page"
           >
             <CaretLeft size={22} weight="bold" />
           </button>
 
-          {/* Image */}
+          {/* Image — scale to fill height/width while maintaining aspect ratio */}
           <AnimatePresence mode="wait">
             <motion.img
               key={current.currentPage}
               src={`data:image/png;base64,${current.thumbnailBase64}`}
               alt={`Page ${current.currentPage}`}
-              initial={{ opacity: 0, scale: 0.97 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.97 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.15 }}
-              className="max-h-full max-w-full object-contain rounded-lg shadow-2xl shadow-black/60"
+              className="h-full w-auto max-w-full object-contain rounded-lg shadow-2xl shadow-black/60"
               draggable={false}
             />
           </AnimatePresence>
@@ -113,7 +110,7 @@ export function ImageLightbox({
           <button
             onClick={handleNext}
             disabled={!hasNext}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-3 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-0 disabled:pointer-events-none text-white transition-all"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-20 p-3 rounded-xl bg-white/5 hover:bg-white/15 disabled:opacity-0 disabled:pointer-events-none text-white transition-all"
             title="Next page"
           >
             <CaretRight size={22} weight="bold" />
