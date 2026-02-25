@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { invoke } from "@tauri-apps/api/core";
 import { Clock, FolderOpen } from "@phosphor-icons/react";
 import type { RecentConversion } from "../types";
 
@@ -61,7 +62,7 @@ export function RecentConversions({ recent }: RecentConversionsProps) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  // Will be wired to Tauri's open_output_folder
+                  invoke("open_output_folder", { path: item.outputDir }).catch(console.error);
                 }}
                 className="p-1 rounded-md opacity-0 group-hover:opacity-100 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-all"
                 title="Open folder"

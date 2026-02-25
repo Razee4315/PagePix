@@ -173,7 +173,11 @@ export function SettingsView({
       <section>
         <SectionLabel>Data</SectionLabel>
         <button
-          onClick={onClearRecent}
+          onClick={() => {
+            if (window.confirm("Clear all recent conversions?")) {
+              onClearRecent();
+            }
+          }}
           className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-danger hover:bg-red-50 dark:hover:bg-red-950/20 transition-colors"
         >
           <Trash size={16} weight="bold" />

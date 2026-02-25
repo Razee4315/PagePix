@@ -1,5 +1,6 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { open } from "@tauri-apps/plugin-dialog";
 import { TitleBar } from "./components/TitleBar";
 import { HomeView } from "./views/HomeView";
 import { ProcessingView } from "./views/ProcessingView";
@@ -88,6 +89,38 @@ function App() {
     setResult(null);
     setCurrentView("home");
   }, []);
+
+  // Keep a ref to currentView so the keyboard handler always sees the latest
+  const viewRef = useRef(currentView);
+  viewRef.current = currentView;
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      // Ctrl+O — open file browser (only from home or complete view)
+      if ((e.ctrlKey || e.metaKey) && e.key === "o") {
+        e.preventDefault();
+        if (viewRef.current === "home" || viewRef.current === "complete") {
+          open({
+            multiple: false,
+            filters: [{ name: "PDF Documents", extensions: ["pdf"] }],
+          }).then((selected) => {
+            if (selected) handleFileSelected(selected as string);
+          }).catch(() => {});
+        }
+      }
+
+      // Esc — go back from settings, or cancel conversion
+      if (e.key === "Escape") {
+        if (viewRef.current === "settings") {
+          setCurrentView("home");
+        }
+      }
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [handleFileSelected]);
 
   return (
     <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 rounded-lg overflow-hidden">

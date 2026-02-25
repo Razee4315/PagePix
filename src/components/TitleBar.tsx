@@ -47,6 +47,7 @@ export function TitleBar({
           <button
             onClick={() => onNavigate("home")}
             className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+            title="Back to home"
           >
             <ArrowLeft size={16} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
           </button>
@@ -77,6 +78,7 @@ export function TitleBar({
             <button
               onClick={() => onNavigate("settings")}
               className="p-1.5 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+              title="Settings"
             >
               <GearSix size={15} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
             </button>
@@ -90,18 +92,21 @@ export function TitleBar({
         <button
           onClick={handleMinimize}
           className="inline-flex items-center justify-center w-11 h-11 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          title="Minimize"
         >
           <Minus size={14} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
         </button>
         <button
           onClick={handleMaximize}
           className="inline-flex items-center justify-center w-11 h-11 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+          title="Maximize"
         >
           <Square size={12} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
         </button>
         <button
           onClick={handleClose}
           className="inline-flex items-center justify-center w-11 h-11 hover:bg-red-500 group transition-colors rounded-tr-none"
+          title="Close"
         >
           <X size={14} weight="bold" className="text-zinc-500 dark:text-zinc-400 group-hover:text-white" />
         </button>

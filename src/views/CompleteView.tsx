@@ -1,6 +1,7 @@
-import { motion } from "framer-motion";
+import { useState, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { invoke } from "@tauri-apps/api/core";
-import { CheckCircle, FolderOpen, ArrowCounterClockwise } from "@phosphor-icons/react";
+import { CheckCircle, FolderOpen, ArrowCounterClockwise, Copy, Check } from "@phosphor-icons/react";
 import { PageThumbnailGrid } from "../components/PageThumbnailGrid";
 import type { ConversionResult, ConversionProgress } from "../types";
 
@@ -21,6 +22,8 @@ export function CompleteView({
   thumbnails,
   onConvertAnother,
 }: CompleteViewProps) {
+  const [copied, setCopied] = useState(false);
+
   const handleOpenFolder = async () => {
     try {
       await invoke("open_output_folder", { path: result.outputDir });
@@ -28,6 +31,13 @@ export function CompleteView({
       console.error("Failed to open folder:", err);
     }
   };
+
+  const handleCopyPath = useCallback(() => {
+    navigator.clipboard.writeText(result.outputDir).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(console.error);
+  }, [result.outputDir]);
 
   return (
     <div className="h-full flex flex-col px-6 py-6 gap-6 overflow-auto">
@@ -61,11 +71,42 @@ export function CompleteView({
       </motion.div>
 
       {/* Output Path */}
-      <div
-        data-selectable
-        className="px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-xs font-mono text-zinc-500 dark:text-zinc-400 truncate"
-      >
-        {result.outputDir}
+      <div className="flex items-center gap-2">
+        <div
+          data-selectable
+          className="flex-1 px-3 py-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-xs font-mono text-zinc-500 dark:text-zinc-400 truncate"
+        >
+          {result.outputDir}
+        </div>
+        <button
+          onClick={handleCopyPath}
+          className="p-2 rounded-lg bg-zinc-100 dark:bg-zinc-900 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors shrink-0"
+          title="Copy path"
+        >
+          <AnimatePresence mode="wait" initial={false}>
+            {copied ? (
+              <motion.div
+                key="check"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Check size={14} weight="bold" className="text-success" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="copy"
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.5, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <Copy size={14} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </button>
       </div>
 
       {/* Thumbnail Grid */}

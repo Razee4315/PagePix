@@ -126,6 +126,9 @@ export function DropZone({ onFileSelected, onBrowse }: DropZoneProps) {
               </p>
               <p className="text-xs text-zinc-400 dark:text-zinc-500">
                 or click to browse
+                <span className="hidden sm:inline text-zinc-300 dark:text-zinc-600 ml-1">
+                  (Ctrl+O)
+                </span>
               </p>
             </div>
           </div>

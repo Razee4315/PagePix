@@ -40,6 +40,16 @@ body {
   user-select: text;
 }
 
+/* Keyboard-only focus rings */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

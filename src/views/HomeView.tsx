@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { motion } from "framer-motion";
 import { open } from "@tauri-apps/plugin-dialog";
-import { Images, Lightning, FolderSimple } from "@phosphor-icons/react";
+import { Images, Lightning, FolderSimple, ClockCounterClockwise } from "@phosphor-icons/react";
 import { DropZone } from "../components/DropZone";
 import { RecentConversions } from "../components/RecentConversions";
 import { Logo } from "../components/Logo";
@@ -79,16 +79,23 @@ export function HomeView({ onFileSelected, recent }: HomeViewProps) {
       </motion.div>
 
       {/* Recent conversions at the bottom */}
-      {recent.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="border-t border-zinc-200/80 dark:border-zinc-800/80 px-6 py-4"
-        >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3 }}
+        className="border-t border-zinc-200/80 dark:border-zinc-800/80 px-6 py-4"
+      >
+        {recent.length > 0 ? (
           <RecentConversions recent={recent} />
-        </motion.div>
-      )}
+        ) : (
+          <div className="flex items-center gap-2.5 py-2 px-1">
+            <ClockCounterClockwise size={14} weight="bold" className="text-zinc-300 dark:text-zinc-700" />
+            <span className="text-xs text-zinc-400 dark:text-zinc-600">
+              Your recent conversions will appear here
+            </span>
+          </div>
+        )}
+      </motion.div>
     </div>
   );
 }
