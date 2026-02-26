@@ -33,12 +33,27 @@ function App() {
   const { recent, addRecent, clearRecent } = useRecentConversions();
 
   const [currentView, setCurrentView] = useState<AppView>("home");
+  const previousViewRef = useRef<AppView>("home");
   const [pdfPath, setPdfPath] = useState<string>("");
   const [pdfFilename, setPdfFilename] = useState<string>("");
   const [progress, setProgress] = useState<ConversionProgress[]>([]);
   const [totalPages, setTotalPages] = useState(0);
   const [result, setResult] = useState<ConversionResult | null>(null);
   const [pageRange, setPageRange] = useState<string>("");
+
+  const navigateTo = useCallback((view: AppView) => {
+    // Save where we're coming from before navigating
+    previousViewRef.current = currentView;
+    setCurrentView(view);
+  }, [currentView]);
+
+  const navigateBack = useCallback(() => {
+    // Go back to where the user came from (default to home)
+    const prev = previousViewRef.current;
+    // Only go back to home or complete, never back to processing/settings
+    const target = prev === "complete" ? "complete" : "home";
+    setCurrentView(target);
+  }, []);
 
   // Apply accent color to CSS custom properties
   useEffect(() => {
@@ -146,14 +161,14 @@ function App() {
 
       if (e.key === "Escape") {
         if (viewRef.current === "settings") {
-          setCurrentView("home");
+          navigateBack();
         }
       }
     }
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [handleFileSelected]);
+  }, [handleFileSelected, navigateBack]);
 
   return (
     <div className="flex flex-col h-screen bg-zinc-50 dark:bg-zinc-950 rounded-lg overflow-hidden">
@@ -162,7 +177,8 @@ function App() {
         resolvedTheme={resolvedTheme}
         onThemeToggle={cycleTheme}
         currentView={currentView}
-        onNavigate={setCurrentView}
+        onNavigate={navigateTo}
+        onBack={navigateBack}
       />
 
       <main className="flex-1 overflow-hidden relative">

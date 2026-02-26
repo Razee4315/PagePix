@@ -10,6 +10,7 @@ interface TitleBarProps {
   onThemeToggle: () => void;
   currentView: AppView;
   onNavigate: (view: AppView) => void;
+  onBack?: () => void;
 }
 
 export function TitleBar({
@@ -18,6 +19,7 @@ export function TitleBar({
   onThemeToggle,
   currentView,
   onNavigate,
+  onBack,
 }: TitleBarProps) {
   const ThemeIcon =
     theme === "system" ? Monitor : resolvedTheme === "dark" ? Moon : Sun;
@@ -45,9 +47,9 @@ export function TitleBar({
       <div data-tauri-drag-region className="flex items-center gap-2.5">
         {currentView === "settings" ? (
           <button
-            onClick={() => onNavigate("home")}
+            onClick={() => onBack ? onBack() : onNavigate("home")}
             className="p-1 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
-            title="Back to home"
+            title="Back"
           >
             <ArrowLeft size={16} weight="bold" className="text-zinc-500 dark:text-zinc-400" />
           </button>
